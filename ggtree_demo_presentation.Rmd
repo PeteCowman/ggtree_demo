@@ -1,0 +1,235 @@
+---
+title: "Plotting Phylogenetic trees with ggtree"
+author: "Peter F Cowman"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  ioslides_presentation:
+    incremental: false
+    css: styles.css
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Phylogenetic trees in R
+
+### __Working In Base R__
+
+1. APE - Analyses of Phylogenetics an Evolution
+   + "Analysis of Phylogenetic and Evolution with R" by E Paradis
+   + There is a book!
+   + Version 5 - maintained & great email community (r-sig-phylo@r-project.org)
+2. Phytools - Liam Revell
+   + Phylogenetic comparative methods
+   + Also plotting functions
+   + excellent blog - http://blog.phytools.org
+
+## Phylogenetic trees in R {.smaller}
+
+### __Working In Base R__ 
+
+```{r echo = TRUE}
+library(ape)
+tree <- read.tree("example_data/test_tree.tre")
+tree
+```
+## Phylogenetic trees in R {.smaller}
+
+### __Working In Base R__ 
+
+```{r echo = TRUE}
+tree$tip.label
+tree$edge
+tree$Nnode
+```
+
+## Phylogenetic trees in R {.smaller}
+
+### __Working In Base R__ 
+
+```{r echo = TRUE}
+plot(tree)
+nodelabels()
+```
+
+
+## The ggtree Package {.smaller}
+
+### __ggplot for Phylogenetic trees!__ 
+G Yu. Using ggtree to visualize data on tree-like structures. Current Protocols in Bioinformatics, 2020, 69:e96. doi: 10.1002/cpbi.96.
+
+### __Resources:__ 
+Data Integration, Manipulation and Visualization of Phylogenetic Trees: https://yulab-smu.github.io/treedata-book/
+
+![](img/ggtree.png){width=200px}
+
+
+## The ggtree Package {.smaller}
+
+- Install via Bioconductor
+- Dependancies: treeio, tidytree
+- treeio: tree parser function
+   + read.raxml, read.beast, read.iqtree etc...
+- tidytree - your tree in the "tidyverse"
+   + the treedata object
+
+```{r, echo = FALSE}
+library(tidyverse)
+library(ggtree)
+library(treeio)
+library(tidytree)
+```
+## The treedata object {.smaller}
+
+```{r, echo = TRUE}
+tree2 <- read.beast("example_data/Chaetodontidae.tre")
+tree2
+```
+
+## The treedata object {.smaller}
+
+```{r, echo = TRUE}
+tree2@phylo
+```
+
+## The treedata object {.smaller}
+
+```{r, echo=TRUE}
+tree2@data
+```
+
+## The ggtree Package {.smaller}
+
+### __Enter the "Phylo-verse"__
+
+Essentially ggtree provides a __geom_tree__ layer for ggplot
+
+```{r, echo = TRUE}
+ggplot() + geom_tree(data = tree)
+```
+
+## The ggtree Package {.smaller}
+
+
+But ggtree provide a "wrapper" for this
+
+```{r, echo  = TRUE}
+ggtree(tree)
+```
+
+
+
+## Plotting with ggtree {.smaller}
+
+- As with ggplot2, you work with __layers__
+- The tree is a layer, the tip labels are a layer
+- other annotation, or added data are layers linked to the tree by tips and nodes
+- make aesthetic changes sam as ggplot2 and use of theme()
+
+
+## Plotting with ggtree {.smaller}
+
+```{r, echo = TRUE, fig.height=3, error=FALSE}
+p1 <- ggtree(tree) + geom_tiplab()
+p2 <- ggtree(tree, layout = "slanted", color="firebrick", size=2, linetype="dotted") + 
+   geom_tiplab()
+p3 <- ggtree(tree, layout = "fan") + geom_tiplab(size = 6, colour = "red")
+multiplot(p1, p2, p3, ncol = 3)
+```
+
+## Plotting with ggtree {.smaller}
+
+You can add various annotations
+
+```{r, echo = TRUE, fig.height=4, error=FALSE}
+ggtree(tree) + 
+   geom_tiplab(offset = 0.3) + geom_point(aes(shape=isTip, color=isTip), size=3)
+```
+## Plotting with ggtree {.smaller}
+
+You can add various annotations
+
+```{r, echo = TRUE, fig.height=4, error=FALSE}
+ggtree(tree) + 
+   geom_tiplab(offset = 0.3) + geom_nodepoint(aes(color  = "red"), size=6, alpha = 0.5)
+```
+
+## Plotting with ggtree {.smaller}
+
+Alter the theme
+
+```{r, echo = TRUE, fig.height=4, error=FALSE}
+p1 <- ggtree(tree, colour  = "white") + geom_tiplab(offset = 0.3, colour = "white") + geom_nodepoint(aes(color  = "red"), size=6, alpha = 0.5)
+
+p1 + theme_tree(bgcolor = "black")
+```
+
+
+## Plotting with ggtree {.smaller}
+
+Label a clade
+
+```{r, echo = TRUE, fig.height=4, error=FALSE}
+ggtree(tree) + 
+   geom_tiplab(offset = 0.3) + xlim(NA, 6) + 
+   geom_cladelabel(node = 11, label  = "Some Clade", offset = 1, color='red') +
+   geom_cladelabel(node = 9, label  = "Some other\nClade", offset = 0.5, color='blue')
+```
+
+## Plotting with ggtree {.smaller}
+
+Grouping Taxa
+
+```{r, echo = TRUE, fig.height=3.5, error=FALSE}
+grps <- list(G1 = c("C","D", "E"), G2 = c("A", "B"), G3 = c("F", "G"))
+p <- ggtree(tree) + geom_tiplab(offset = 0.3) + xlim(NA, 6) + geom_cladelabel(node = 11, label  = "Some Clade", offset = 1, color='red') +
+   geom_cladelabel(node = 9, label  = "Some other\nClade", offset = 0.5, color='blue')
+
+groupOTU(p, grps, 'Species') + aes(color=Species) +
+  theme(legend.position="right")
+```
+
+## Plotting with ggtree {.smaller}
+
+Plotting a tree that has some data associated with the nodes
+
+```{r, echo = TRUE, fig.height=4, error=FALSE}
+ggtree(tree2)
+```
+
+## Plotting with ggtree {.smaller}
+
+Plotting a tree that has some data associated with the nodes
+
+```{r, echo = TRUE, fig.height=4, error=FALSE}
+tree2@data %>% glimpse()
+```
+
+## Plotting with ggtree {.smaller}
+
+Plotting a tree that has some data associated with the nodes
+
+```{r, echo = TRUE, fig.height=4, error=FALSE}
+p <- ggtree(tree2)
+p1 <- revts(p)
+p1 + geom_nodepoint(aes(colour = posterior), size = 2) + theme_tree2()
+```
+
+
+## Plotting with ggtree {.smaller}
+
+Plotting a tree that has some data associated with the nodes
+
+```{r, echo = TRUE, fig.height=4, error=FALSE}
+p1 + geom_range(range='height_0.95_HPD', color='red', alpha=.4, size=1) + theme_tree2()
+```
+
+## Plotting with ggtree {.smaller}
+
+Now i will move over to R to have some fun with tree plotting
+
+__Cheers!__
+
+
+

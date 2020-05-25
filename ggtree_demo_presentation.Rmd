@@ -105,7 +105,7 @@ tree2@data
 
 Essentially ggtree provides a __geom_tree__ layer for ggplot
 
-```{r, echo = TRUE}
+```{r, echo = TRUE, fig.height=3}
 ggplot() + geom_tree(data = tree)
 ```
 

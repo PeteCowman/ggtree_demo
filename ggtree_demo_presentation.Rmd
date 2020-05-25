@@ -227,6 +227,16 @@ p1 + geom_range(range='height_0.95_HPD', color='red', alpha=.4, size=1) + theme_
 
 ## Plotting with ggtree {.smaller}
 
+### My goal
+
+Completely plot a phylo figure in ggtree without then having to use illustrator to make adjustment
+
+![](img/title_slide_graphic.png){width=750px}
+
+
+
+## Plotting with ggtree {.smaller}
+
 Now i will move over to R to have some fun with tree plotting
 
 __Cheers!__

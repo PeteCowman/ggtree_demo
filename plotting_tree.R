@@ -23,7 +23,6 @@ nodelabels()
 ggtree(tr, layout = "circular")
 
 # since it is calibrated to time I will reverse the node ages to be time before present
-
 p <- ggtree(tr)
 p1 <- revts(p)
 
@@ -37,6 +36,19 @@ p1 + geom_tiplab()
 
 
 # lets label some clades
+p1 + geom_nodelab(aes(label = node), geom = "label")
+# 112, 136, 205, 182, 165, 141
+p1 + geom_tiplab(offset = 0.3, size = 2.5) + xlim(NA, 40) + 
+  geom_cladelabel(node = 112, label  = "Banerfishes", offset = 20,offset.text = 1, color='black', barsize = 2) + geom_cladelabel(node = 136, label  = "Prognathodes", offset = 20,offset.text = 1, color='grey', barsize = 2) + geom_cladelabel(node = 205, label  = "Clade 1", offset = 20,offset.text = 1, color='black', barsize = 2) + 
+  geom_cladelabel(node = 182, label  = "Clade 2", offset = 20,offset.text = 1, color='grey', barsize = 2) + 
+
+# view a clade
 
 
 
+# plot some data beside the tree
+# make some data
+fish.size <- tibble(label = tr@phylo$tip.label, body.szie = rnorm(length(tr@phylo$tip.label), mean=15, sd=10))
+fish.size
+
+p1 
